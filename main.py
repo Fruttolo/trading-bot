@@ -41,7 +41,7 @@ while True:
     lastWeekRange = lastWeekHigh - lastWeekLow
     quarterRange = lastWeekRange / 4
     entry = (lastWeekLow + quarterRange)
-    percentRange = 1 + (quarterRange / entry)
+    percentRange = round(1 + (quarterRange / entry), 4)
     print("percentRange:",percentRange)
     print("Entry:",entry)
     print("Current:",currentPrice)
@@ -81,8 +81,13 @@ while True:
 
         waiting = True
 
+        with open("logfile.txt", "a") as file:
+            file.write("Bought at: " + str(currentPrice) + " STOPLOSS: " + str(stop_loss_price) + "TAKEPROFIT:" + str(take_profit_price) + "QUANTITY:" + str(QUANTITY) + "\n")
+
     if(currentPrice > entry + quarterRange and waiting == True):
         waiting = False
+        with open("logfile.txt", "a") as file:
+            file.write("WAITING:FALSE" + "\n")
 
     sleep(1)
 
