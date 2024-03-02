@@ -28,7 +28,7 @@ def getBalance():
     return balance
 
 def calculateHighLow():
-    klines = client.get_historical_klines(PAIR, "1w", "1 week ago UTC")
+    klines = client.get_historical_klines(PAIR, "1h", "1 hour ago UTC")
     lastWeekHigh = klines[-1][2]
     lastWeekLow = klines[-1][3]
     return float(lastWeekHigh), float(lastWeekLow)
