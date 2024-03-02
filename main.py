@@ -50,34 +50,36 @@ while True:
 
     if(currentPrice < entry and waiting == False):
         print("Buying")
-        order = client.create_test_order(
+        """ order = client.create_test_order(
             symbol=PAIR,
             side=SIDE_BUY,
             type=ORDER_TYPE_MARKET,
             quantity=QUANTITY,  # Replace with the desired quantity to buy
-        )
+        ) """
 
-        take_profit_price = float(order['price']) * TAKEPROFIT  # Set take profit price as 1% above the buy price
+        #order['price']
+        take_profit_price = float(currentPrice) * TAKEPROFIT  # Set take profit price as 1% above the buy price
 
-        client.create_test_order(
+        """ client.create_test_order(
             symbol=PAIR,
             side=SIDE_SELL,
             type=ORDER_TYPE_LIMIT,
             quantity=QUANTITY,  # Replace with the desired quantity to sell
             price=take_profit_price,
         )
-        print("Bought at:",order['price'])
+        print("Bought at:",order['price']) """
 
-        stop_loss_price = float(order['price']) * STOPLOSS  # Set stop loss price as 1% below the buy price
+        #order['price']
+        stop_loss_price = float(currentPrice) * STOPLOSS  # Set stop loss price as 1% below the buy price
 
-        client.create_test_order(
+        """ client.create_test_order(
             symbol=PAIR,
             side=SIDE_SELL,
             type=ORDER_TYPE_STOP_LOSS_LIMIT,
             quantity=QUANTITY,  # Replace with the desired quantity to sell
             stopPrice=stop_loss_price,
             price=stop_loss_price,
-        )
+        ) """
 
         waiting = True
 
