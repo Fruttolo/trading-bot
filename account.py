@@ -1,5 +1,6 @@
 from balance import Balance
 from order import Order
+import datetime
 
 class Account:
 
@@ -36,11 +37,15 @@ class Account:
         for order in self.orders:
             if order.sl != 0 and low <= order.sl:
                 self.balance.add(order.amount * order.sl)
+                with open("logfile.txt", "a") as file:
+                    file.write("[" + str(datetime.datetime.now()) + "] SellAt: " + str(high) + " SL:" + str(order.amount*order.tp) + "\n")
                 toRemove.append(order)
                 if self.verbose:
                     print("Stop loss: ", order.amount * order.sl)
             elif order.tp != 0 and high >= order.tp:
                 self.balance.add(order.amount * order.tp)
+                with open("logfile.txt", "a") as file:
+                    file.write("[" + str(datetime.datetime.now()) + "] SellAt: " + str(high) + " TP:" + str(order.amount*order.tp) + "\n")
                 toRemove.append(order)
                 if self.verbose:
                     print("Take profit: ", order.amount * order.tp)
