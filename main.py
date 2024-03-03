@@ -16,6 +16,7 @@ API_KEY = os.getenv("API_KEY")
 API_SECRET = os.getenv("API_SECRET")
 PAIR = os.getenv("PAIR")
 QUANTITY = os.getenv("QUANTITY")
+QUANTITY = float(QUANTITY)
 
 account = Account(1000)
 
