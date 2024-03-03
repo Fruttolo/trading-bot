@@ -3,6 +3,9 @@ from binance.enums import *
 from dotenv import load_dotenv
 import os
 from time import sleep
+import datetime
+from account import Account
+
 
 # Constants
 # Load the environment variables from .env file
@@ -13,8 +16,8 @@ API_KEY = os.getenv("API_KEY")
 API_SECRET = os.getenv("API_SECRET")
 PAIR = os.getenv("PAIR")
 QUANTITY = os.getenv("QUANTITY")
-TAKEPROFIT = float(os.getenv("TAKEPROFIT"))
-STOPLOSS = float(os.getenv("STOPLOSS"))
+
+account = Account(1000)
 
 # Initialize the Binance client
 client = Client(API_KEY, API_SECRET)
@@ -28,13 +31,19 @@ def getBalance():
     return balance
 
 def calculateHighLow():
-    klines = client.get_historical_klines(PAIR, "1h", "1 hour ago UTC")
-    lastWeekHigh = klines[-1][2]
-    lastWeekLow = klines[-1][3]
+    klines = client.get_historical_klines(PAIR, "1h", "2 hour ago UTC")
+    lastWeekHigh = 0
+    lastWeekLow = 1000000
+    for candle in klines:
+        if float(candle[2]) > lastWeekHigh:
+            lastWeekHigh = float(candle[2])
+        if float(candle[3]) < lastWeekLow:
+            lastWeekLow = float(candle[3])
     return float(lastWeekHigh), float(lastWeekLow)
 
 waiting = False
 while True:
+
     # Calulate 1/4 of the ranfe between the high and low of the last week
     lastWeekHigh, lastWeekLow = calculateHighLow()
     currentPrice = float(getPrice())
@@ -42,6 +51,7 @@ while True:
     quarterRange = lastWeekRange / 4
     entry = (lastWeekLow + quarterRange)
     percentRange = round(1 + (quarterRange / entry), 4)
+
     print("percentRange:",percentRange)
     print("Entry:",entry)
     print("Current:",currentPrice)
@@ -49,7 +59,11 @@ while True:
     print()
 
     if(currentPrice < entry and waiting == False):
+        TAKEPROFIT = entry + (quarterRange * 2)
+        STOPLOSS = entry - quarterRange
+
         print("Buying")
+
         """ order = client.create_test_order(
             symbol=PAIR,
             side=SIDE_BUY,
@@ -81,15 +95,17 @@ while True:
             price=stop_loss_price,
         ) """
 
+        account.buy(QUANTITY, currentPrice, take_profit_price, stop_loss_price)
         waiting = True
 
         with open("logfile.txt", "a") as file:
-            file.write("Bought at: " + str(currentPrice) + " STOPLOSS: " + str(stop_loss_price) + "TAKEPROFIT:" + str(take_profit_price) + "QUANTITY:" + str(QUANTITY) + "\n")
+            file.write("[" + str(datetime.datetime.now()) + "] BoughtAt: " + str(currentPrice) + " SL:" + str(stop_loss_price) + " TP:" + str(take_profit_price) + " Q:" + str(QUANTITY) + "\n")
 
-    if(currentPrice > entry + quarterRange and waiting == True):
+    if(currentPrice > entry + (quarterRange*2) and waiting == True):
         waiting = False
         with open("logfile.txt", "a") as file:
-            file.write("WAITING:FALSE" + "\n")
+            file.write("[" + str(datetime.datetime.now()) + "] WAITING:FALSE" + "\n")
 
+    account.check_tp_sl(currentPrice, currentPrice)
     sleep(1)
 

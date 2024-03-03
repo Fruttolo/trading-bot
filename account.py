@@ -25,7 +25,7 @@ class Account:
             if self.verbose:
                 print("Not enough balance")
             return
-        self.orders.append(Order(self.id_order, amount, price, self.takeprofit(price, tp), self.stoploss(price, sl)))
+        self.orders.append(Order(self.id_order, amount, price, tp, sl))
         self.balance.remove(amount * price)
         self.id_order += 1
 
