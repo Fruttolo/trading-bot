@@ -1,6 +1,24 @@
-from balance import Balance
-from order import Order
 import datetime
+class Order:
+    def __init__(self, id ,amount, price, tp, sl):
+        self.amount = amount
+        self.price = price
+        self.tp = tp
+        self.sl = sl
+        self.id = id
+
+class Balance:
+    def __init__(self, amount):
+        self.amount = amount
+
+    def add(self, amount):
+        self.amount += amount
+
+    def remove(self, amount):
+        self.amount -= amount
+
+    def get(self):
+        return self.amount
 
 class Account:
 
@@ -38,14 +56,14 @@ class Account:
             if order.sl != 0 and low <= order.sl:
                 self.balance.add(order.amount * order.sl)
                 with open("logfile.txt", "a") as file:
-                    file.write("[" + str(datetime.datetime.now()) + "] SellAt:" + str(high) + " SL:" + str(order.amount*order.tp) + "\n")
+                    file.write("[" + str(datetime.datetime.now()) + "] SellAt:" + str(high) + " P:" + str(order.amount*order.sl) + " StopLoss" + "\n")
                 toRemove.append(order)
                 if self.verbose:
                     print("Stop loss: ", order.amount * order.sl)
             elif order.tp != 0 and high >= order.tp:
                 self.balance.add(order.amount * order.tp)
                 with open("logfile.txt", "a") as file:
-                    file.write("[" + str(datetime.datetime.now()) + "] SellAt:" + str(high) + " TP:" + str(order.amount*order.tp) + "\n")
+                    file.write("[" + str(datetime.datetime.now()) + "] SellAt:" + str(high) + " P:" + str(order.amount*order.tp) + " TakeProfit" + "\n")
                 toRemove.append(order)
                 if self.verbose:
                     print("Take profit: ", order.amount * order.tp)
