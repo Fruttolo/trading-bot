@@ -15,8 +15,10 @@ load_dotenv()
 API_KEY = os.getenv("API_KEY")
 API_SECRET = os.getenv("API_SECRET")
 PAIR = os.getenv("PAIR")
-QUANTITY = os.getenv("QUANTITY")
-QUANTITY = float(QUANTITY)
+MARKET = os.getenv("MARKET")
+BALANCEASSET = os.getenv("BALANCEASSET")
+RISK = os.getenv("RISK")
+RISK = float(RISK)
 
 account = Account(1000)
 
@@ -28,7 +30,7 @@ def getPrice():
     return price['price']
 
 def getBalance():
-    balance = client.get_asset_balance(asset='EUR')
+    balance = client.get_asset_balance(asset=BALANCEASSET)
     return balance
 
 def calculateHighLow():
@@ -42,6 +44,12 @@ def calculateHighLow():
             lastWeekLow = float(candle[3])
     return float(lastWeekHigh), float(lastWeekLow)
 
+def calculateQuantity(diffPrice):
+    balance = getBalance()
+    balance = float(balance['free'])
+    quantity = (balance * RISK) / diffPrice
+    return quantity
+
 waiting = False
 while True:
 
@@ -50,22 +58,28 @@ while True:
     currentPrice = float(getPrice())
     lastWeekRange = lastWeekHigh - lastWeekLow
     quarterRange = lastWeekRange / 4
-    entry = (lastWeekLow + quarterRange)
-    percentRange = round(1 + (quarterRange / entry), 4)
+    if MARKET == "SIDE":
+        entry = (lastWeekLow + quarterRange)
+    elif MARKET == "BEAR":
+        entry = (lastWeekLow)
+    elif MARKET == "BULL":
+        entry = (lastWeekLow + (quarterRange*2))
+    percentRange = round(100 * (quarterRange / entry), 2)
 
-    print("percentRange:",percentRange)
-    print("lastWeekHigh:",lastWeekHigh)
-    print("lastWeekLow:",lastWeekLow)
-    print("Entry:",entry)
+    print("percentRange:",percentRange, "%")
+    print("high:",lastWeekHigh)
+    print("low:",lastWeekLow)
+    print("Entry:", entry, MARKET)
     print("Current:",currentPrice)
     print("Pending orders:", account.n_pending_orders())
-    print("Balance available:", account.get_balance())
+    print("Balance available:", account.get_balance(), BALANCEASSET)
     print("Waiting:",waiting)
     print()
 
     if(currentPrice < entry and waiting == False):
         TAKEPROFIT = entry + (quarterRange * 2)
         STOPLOSS = entry - quarterRange
+        QUANTITY = calculateQuantity(quarterRange)
 
         """ order = client.create_test_order(
             symbol=PAIR,
