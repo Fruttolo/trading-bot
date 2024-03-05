@@ -32,7 +32,7 @@ def getBalance():
     return balance
 
 def calculateHighLow():
-    klines = client.get_historical_klines(PAIR, "1h", "2 hour ago UTC")
+    klines = client.get_historical_klines(PAIR, "1m", "1 hour ago UTC")
     lastWeekHigh = 0
     lastWeekLow = 1000000
     for candle in klines:
@@ -54,6 +54,8 @@ while True:
     percentRange = round(1 + (quarterRange / entry), 4)
 
     print("percentRange:",percentRange)
+    print("lastWeekHigh:",lastWeekHigh)
+    print("lastWeekLow:",lastWeekLow)
     print("Entry:",entry)
     print("Current:",currentPrice)
     print("Pending orders:", account.n_pending_orders())
