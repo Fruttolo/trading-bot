@@ -45,8 +45,8 @@ def calculateHighLow():
     return float(lastWeekHigh), float(lastWeekLow)
 
 def calculateQuantity(diffPrice):
-    balance = getBalance()
-    balance = float(balance['free'])
+    balance = account.get_balance()
+    #balance = float(balance['free'])
     quantity = (balance * RISK) / diffPrice
     return quantity
 
