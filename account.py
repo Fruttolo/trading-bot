@@ -22,6 +22,13 @@ class Balance:
 
 class Account:
 
+    def commission(self, side, amount):
+        COMMISSION = 0.001
+        if side == 'buy':
+            return amount * (1 + COMMISSION)
+        else:
+            return amount * (1 - COMMISSION)
+
     def __init__(self, balance=1000):
         self.balance = Balance(balance)
         self.orders = []
@@ -45,8 +52,10 @@ class Account:
                 print("Not enough balance")
             return
         self.orders.append(Order(self.id_order, amount, price, tp, sl))
-        self.balance.remove(amount * price)
+        self.balance.remove(self.commission('buy',amount * price))
         self.id_order += 1
+        with open("logfile.txt", "a") as file:
+            file.write("[" + str(datetime.datetime.now()) + "] BoughtAt:" + str(price) + " SL:" + str(sl) + " TP:" + str(tp) + " Q:" + str(price*amount) + "\n")
 
     def check_tp_sl(self, high, low):
         high = float(high)
@@ -54,19 +63,19 @@ class Account:
         toRemove = []
         for order in self.orders:
             if order.sl != 0 and low <= order.sl:
-                self.balance.add(order.amount * order.sl)
+                self.balance.add(self.commission('sell',order.amount * order.sl))
                 with open("logfile.txt", "a") as file:
-                    file.write("[" + str(datetime.datetime.now()) + "] SellAt:" + str(high) + " P:" + str(order.amount*order.sl) + " StopLoss" + "\n")
+                    file.write("[" + str(datetime.datetime.now()) + "] SellAt:" + str(high) + " P:" + str((order.amount*order.sl)) + " StopLoss" + "\n")
                 toRemove.append(order)
                 if self.verbose:
-                    print("Stop loss: ", order.amount * order.sl)
+                    print("Stop loss: ", (order.amount * order.sl))
             elif order.tp != 0 and high >= order.tp:
-                self.balance.add(order.amount * order.tp)
+                self.balance.add(self.commission('sell',order.amount * order.tp))
                 with open("logfile.txt", "a") as file:
-                    file.write("[" + str(datetime.datetime.now()) + "] SellAt:" + str(high) + " P:" + str(order.amount*order.tp) + " TakeProfit" + "\n")
+                    file.write("[" + str(datetime.datetime.now()) + "] SellAt:" + str(high) + " P:" + str((order.amount*order.tp)) + " TakeProfit" + "\n")
                 toRemove.append(order)
                 if self.verbose:
-                    print("Take profit: ", order.amount * order.tp)
+                    print("Take profit: ", (order.amount * order.tp))
         for id in toRemove:
             self.orders.remove(id)
 
@@ -84,9 +93,24 @@ class Account:
     def sellAll(self, price):
         price = float(price)
         for order in self.orders:
-            self.balance.add(order.amount * price)
+            self.balance.add(self.commission('sell',order.amount * price))
         self.orders = []
 
     def get_n_orders(self):
         return self.id_order
+
+# test methods
+    
+""" account = Account()
+account.verbose = True
+account.buy(1, 100, 110, 90)
+account.buy(1, 100, 110, 90)
+account.buy(1, 100, 110, 90)
+account.print_orders()
+print(account.get_balance())
+account.check_tp_sl(110, 90)
+print(account.get_balance())
+account.print_orders()
+account.sellAll(100)
+print(account.get_balance()) """
 

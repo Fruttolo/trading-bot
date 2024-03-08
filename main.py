@@ -109,13 +109,10 @@ while True:
         account.buy(QUANTITY, currentPrice, TAKEPROFIT, STOPLOSS)
         waiting = True
 
-        with open("logfile.txt", "a") as file:
-            file.write("[" + str(datetime.datetime.now()) + "] BoughtAt:" + str(currentPrice) + " SL:" + str(STOPLOSS) + " TP:" + str(TAKEPROFIT) + " Q:" + str(currentPrice*QUANTITY) + "\n")
-
     if(currentPrice > entry + (quarterRange*2) and waiting == True):
         waiting = False
         with open("logfile.txt", "a") as file:
-            file.write("[" + str(datetime.datetime.now()) + "] WAITING:FALSE" + "\n")
+            file.write("[" + str(datetime.datetime.now()) + "] WAITING:FALSE Price: " + str(currentPrice) + "\n")
 
     account.check_tp_sl(currentPrice, currentPrice)
     sleep(1)
